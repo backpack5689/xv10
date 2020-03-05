@@ -267,6 +267,7 @@ void pointerMenu()
         read(0, addressIndex, sizeof(addressIndex));
     #endif
     p = address[atoi(addressIndex)];
+    printCompletion();
 }
 void mainMenu()
 {
@@ -320,8 +321,8 @@ void mainMenu()
 int main(int argc, char ** argv)
 {
     * p = 0;
-    address[0] = (char *)0;
-    address[1] = (char *)4294967040;
+    address[0] = (char *)4294967040;
+    address[1] = (char *)0;
     address[2] = (char *)&main;
     address[3] = (char *)&_end;
     address[4] = (char *)&ptr;

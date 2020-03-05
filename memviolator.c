@@ -177,7 +177,7 @@ void readMenu()
         read(0,integerthing, sizeof(integerthing));
         n = atoi(integerthing);
     #endif
-    char tmp [44]= "What address would you like to read from?\n";
+    char tmp [44]= "\nWhat address would you like to read from?\n";
     switch(n)
     {
         case 0:
@@ -217,7 +217,7 @@ void readMenu()
 
 void writeMenu()
 {
-    char * menuString = "Writing.\n\n What would you like to do?\n(1)Write a value to an ending location\n(2) Write until Crash \n(3)Write only at the current location\n(0) Main Menu";
+    char * menuString = "\nWriting.\n\n What would you like to do?\n(1)Write a value to an ending location\n(2) Write until Crash \n(3)Write only at the current location\n(0) Main Menu";
     int n;
     #ifdef __pie__
         printf("%s",menuString);
@@ -257,7 +257,7 @@ void writeMenu()
 
 void pointerMenu()
 {
-    char * menuString = "Where would you like to set your pointer to? Type in the corresponding integer.\n(1) 0\n(2) 0xffffff00\n(3) Main Address\n(4) Global Address\n(5) Heap Address\n(6) Stack Address\n(7) Custom Address\n";
+    char * menuString = "\nWhere would you like to set your pointer to? Type in the corresponding integer.\n(1) 0\n(2) 0xffffff00\n(3) Main Address\n(4) Global Address\n(5) Heap Address\n(6) Stack Address\n(7) Custom Address\n";
 
     char addressIndex[40];
     #ifdef __pie__
@@ -273,7 +273,7 @@ void pointerMenu()
 void mainMenu()
 {
     
-    char * mainmenustring = "What would you like to do?\n(1) Read \n(2) Write\n(3) Change pointer location \n(4) Exit\n";
+    char * mainmenustring = "\nWhat would you like to do?\n(1) Read \n(2) Write\n(3) Change pointer location \n(4) Exit\n";
     int n;
     #ifdef __pie__
         printf("%s",mainmenustring);
@@ -321,14 +321,19 @@ void mainMenu()
 //The menu functions handles the stuff
 int main(int argc, char ** argv)
 {
-    * p = 0;
+    ptr = malloc(1);
     address[0] = (char *)4294967040;
     address[1] = (char *)0;
     address[2] = (char *)&main;
     address[3] = (char *)&_end;
     address[4] = (char *)&ptr;
     address[5] = (char *)&argv;
-    ptr = malloc(1);
+    #ifdef __pie__
+        printf("Note: You must set your pointer through the menu before you begin to read/write on linux.\n\n\n");
+    #else
+        * p = 0;
+        printf(1,"Note: Your beginning pointer is set to 0!");
+    #endif
     mainMenu();
     free(ptr);
     #ifdef __pie__

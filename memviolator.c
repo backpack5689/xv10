@@ -5,7 +5,6 @@
 #include <string.h>
 #else
 #include "types.h"
-#include "stat.h"
 #include "user.h"
 #endif
 
@@ -35,7 +34,6 @@ void printCompletion()
         printf(1, "Operation completed! The pointer is currently at: %p",p);
     #endif
 }
-
 
 //-----MEMORY & POINTER FUNCTIONS-----
 //These functions do all the memory operations that can be requested by the user
@@ -81,19 +79,21 @@ void setPointer(int location)
         char in[40];
         #ifdef __pie__
             printf("Enter your custom address value:\n");
-            scanf("%l", temp);
+            scanf("%s", in);
+            p = (char *) atol(in);
+            printCompletion();
         #else
             printf(1, "Enter your custom address value:\n");
             read(0, in, sizeof(in));
             temp = atoi(in);
+            printCompletion();
         #endif
-        printCompletion();
     }
     else
     {
         temp = location;
+        p = (char *)((long) temp);
     }
-    p = (char*)temp;
 }
 
 void setPointerE(int location)
@@ -104,7 +104,8 @@ void setPointerE(int location)
         char in[20];
         #ifdef __pie__
             printf("Enter your custom address value:\n");
-            scanf("%d", temp);
+            scanf("%s", in);
+            temp = atoi(in);
         #else
             printf(1, "Enter your custom address value:\n");
             read(0, in, sizeof(in));
@@ -168,8 +169,8 @@ void readMenu()
     char * menuString = "\n\n Read. What would you like to do?\n(1) Read the next 100 bytes\n(2) Read from a custom address\n(3) Read from your current address\n(0) Back to Main Menu\n\n";
     int n;
     #ifdef __pie__
-        print(menuString);
-        scanf("%d",n);
+        printf("%s",menuString);
+        scanf("%d",&n);
     #else
         printf(1,menuString);
         char integerthing[20];
@@ -188,8 +189,8 @@ void readMenu()
         case 2:
 
             #ifdef __pie__
-                print(tmp);
-                scanf("%d",n);
+                printf("%s",tmp);
+                scanf("%d",&n);
             #else
                 printf(1,tmp);
                 char integerthing[200];
@@ -204,7 +205,7 @@ void readMenu()
             return;
         default:
                 #ifdef __pie__
-                    print(error);
+                    printf("%s",error);
                     errorFlag = 1;
                     return;
                 #else
@@ -219,8 +220,8 @@ void writeMenu()
     char * menuString = "Writing.\n\n What would you like to do?\n(1)Write a value to an ending location\n(2) Write until Crash \n(3)Write only at the current location\n(0) Main Menu";
     int n;
     #ifdef __pie__
-        print(menuString);
-        scanf("%d",n);
+        printf("%s",menuString);
+        scanf("%d",&n);
     #else
         printf(1,menuString);
         char integerthing[20];
@@ -244,7 +245,7 @@ void writeMenu()
             return;
         default:
             #ifdef __pie__
-                print(error);
+                printf("%s",error);
                 errorFlag = 1;
                 return;
             #else
@@ -260,7 +261,7 @@ void pointerMenu()
 
     char addressIndex[40];
     #ifdef __pie__
-        printf(menuString);
+        printf("%s",menuString);
         scanf("%s", addressIndex);
     #else
         printf(1, menuString);
@@ -275,8 +276,8 @@ void mainMenu()
     char * mainmenustring = "What would you like to do?\n(1) Read \n(2) Write\n(3) Change pointer location \n(4) Exit\n";
     int n;
     #ifdef __pie__
-        print(mainmenustring);
-        scanf("%d",n);
+        printf("%s",mainmenustring);
+        scanf("%d",&n);
     #else
         printf(1,mainmenustring);
         char integerthing[20];
@@ -302,7 +303,7 @@ void mainMenu()
             #endif
         default:
                 #ifdef __pie__
-                    print(error);
+                    printf("%s",error);
                     return;
                 #else
                     printf(1,error);

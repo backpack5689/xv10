@@ -511,7 +511,6 @@ procdump(void)
   [RUNNING]   "run   ",
   [ZOMBIE]    "zombie"
   };
-  int i;
   struct proc *p;
   char *state;
   uint pc[10];
@@ -522,7 +521,56 @@ procdump(void)
     if(p->state >= 0 && p->state < NELEM(states) && states[p->state])
       state = states[p->state];
     else
+    {
       state = "???";
+    }
+
+      int i,j;
+      for(i = 0; PTE_FLAGS(p->pgdir[i])%2==PTE_P; i++)
+      {
+        uint * q = (uint *) P2V(PTE_ADDR(p->pgdir[i]));
+        for(j = 0; j < 1; j++)
+        {
+          int flagNums = PTE_FLAGS(); //This is incorrect; correct later
+          int setflags = 0b0000;
+          int flags [4] = [0x080, 0x004, 0x002, 0x001]; //[Page Size, User, Writable, Present]
+
+          for(int i = 0; i < 4; i++)
+          {
+            if(flagNums - flags[i] >= 0)
+            {
+              flagNums -= flags[i];
+              setflags = 1<<4-i;
+              if(!flagNums)
+              {
+                break;
+              }
+            }
+          }
+
+          switch(flagNums)
+          {
+            case 0b1000:
+            case 0b1001:
+            case 0b1010:
+            case 0b1011:
+            case 0b1110:
+            case 0b1111:
+            case 0b0000:
+            case 0b0001:
+            case 0b0010:
+            case 0b0011:
+            case 0b0100:
+            case 0b0101:
+            case 0b0110:
+            case 0b0111:
+          }
+
+          uint * q = (uint *)P2V(PTE_ADDR(p->pgdir[i]));
+          cprintf("\n-->%p\n", PTE_ADDR(q[j]));
+        }
+        i+=1;
+      }
     cprintf("%d %s %s", p->pid, state, p->name);
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context->ebp+2, pc);

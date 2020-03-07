@@ -322,7 +322,7 @@ void mainMenu()
 int main(int argc, char ** argv)
 {
     ptr = malloc(1);
-    address[0] = (char *)4294967040;
+    address[0] = (char *)0xffffff00;
     address[1] = (char *)0;
     address[2] = (char *)&main;
     address[3] = (char *)&_end;

@@ -524,59 +524,77 @@ procdump(void)
     {
       state = "???";
     }
-
-      int i,j;
-      for(i = 0; PTE_FLAGS(p->pgdir[i])%2==PTE_P; i++)
-      {
-        uint * q = (uint *) P2V(PTE_ADDR(p->pgdir[i]));
-        for(j = 0; j < 1; j++)
-        {
-          int flagNums = PTE_FLAGS(); //This is incorrect; correct later
-          int setflags = 0b0000;
-          int flags [4] = [0x080, 0x004, 0x002, 0x001]; //[Page Size, User, Writable, Present]
-
-          for(int i = 0; i < 4; i++)
-          {
-            if(flagNums - flags[i] >= 0)
-            {
-              flagNums -= flags[i];
-              setflags = 1<<4-i;
-              if(!flagNums)
-              {
-                break;
-              }
-            }
-          }
-
-          switch(flagNums)
-          {
-            case 0b1000:
-            case 0b1001:
-            case 0b1010:
-            case 0b1011:
-            case 0b1110:
-            case 0b1111:
-            case 0b0000:
-            case 0b0001:
-            case 0b0010:
-            case 0b0011:
-            case 0b0100:
-            case 0b0101:
-            case 0b0110:
-            case 0b0111:
-          }
-
-          uint * q = (uint *)P2V(PTE_ADDR(p->pgdir[i]));
-          cprintf("\n-->%p\n", PTE_ADDR(q[j]));
-        }
-        i+=1;
-      }
+    int i;
     cprintf("%d %s %s", p->pid, state, p->name);
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context->ebp+2, pc);
       for(i=0; i<10 && pc[i] != 0; i++)
         cprintf(" %p", pc[i]);
     }
+
     cprintf("\n");
+
+
+    int j,k;
+    char writable[2] = {'\0','\0'}; //If writable then 1, else 0
+    int flagNums;
+    int setflags = 0b0000;                                            //0b<Page Size><User><Writable><Present>
+    int flags [3] = {0x004, 0x002, 0x001};                            //[Page Size, User, Writable, Present]
+    int virtualAddress = 0b00000000000000000000000000000000;          //0b[first 10: pdx][second 10: ptx][last 12: offset]
+    for(i = 0; i<1024; i++)
+    {
+      if(!(PTE_FLAGS(p->pgdir[i]) & PTE_P) || !(PTE_FLAGS(p->pgdir[i]) & PTE_U))
+      {
+        continue;
+      }
+      pte_t * q = P2V(PTE_ADDR(p->pgdir[i]));
+      for(j = 0; j < 1024; j++)
+      {
+        //cprintf("%d\n", PTE_FLAGS(q[j]));
+        virtualAddress = i<<22;
+        virtualAddress += j<<12;
+        if(!((q[j]) & PTE_P) || !((q[j]) & PTE_U))
+        {
+          //cprintf("(--)%p -> %p %s (%d)\n",virtualAddress, PTE_ADDR(q[j]), writable,PTE_FLAGS(q[j]));
+          continue;
+        }
+        //This goes through and figures out what flags are applied to each case
+        flagNums = PTE_FLAGS(V2P(q[j]));        
+        flagNums = flagNums&0b111;
+        setflags = 0b000;
+        for(k = 0; k < 3; k++) //Loop for setting flags
+        {
+          if(flagNums - flags[k] >= 0)
+          {
+            flagNums -= flags[k];
+            setflags += 1<<(2-k);
+            if(!flagNums)
+            {
+              break;
+            }
+          }
+          
+          switch(setflags)
+          {
+            //Writable
+            case 0b010:
+            case 0b011:
+            case 0b110:
+            case 0b111:
+              writable[0] = 'W';
+              break;
+            //Not Writable
+            case 0b000:
+            case 0b001:
+            case 0b100:
+            case 0b101:
+              writable[0] = '\0';
+              break;
+          }
+          
+        }
+        cprintf("%p -> %p %s\n",virtualAddress, PTE_ADDR(q[j]), writable);
+      }
+    }
   }
 }

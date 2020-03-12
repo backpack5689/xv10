@@ -244,6 +244,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz, uint ogflags)
     {
       flags = PTE_W|PTE_U;
     }
+    //cprintf("mapped\n");
     //-----END OF EDITS-----//
     if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), flags) < 0){
       cprintf("allocuvm out of memory (2)\n");
@@ -333,7 +334,10 @@ copyuvm(pde_t *pgdir, uint sz)
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))
-      panic("copyuvm: page not present");
+    {
+      continue;
+      //panic("copyuvm: page not present");
+    }
     pa = PTE_ADDR(*pte);
     flags = PTE_FLAGS(*pte);
     if((mem = kalloc()) == 0)
